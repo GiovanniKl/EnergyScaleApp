@@ -11,6 +11,9 @@ const appState = {
   independentTickCount: 0,
   figureWidthPct: 100,
   figureFont: 'system-ui',
+  showAxisLabels: true,
+  tickLabelsIncludeUnits: true,
+  formatDecimals: 2,
 };
 
 function bindControls() {
@@ -34,6 +37,9 @@ function bindControls() {
   const exportFormatSelect = document.getElementById('export-format');
   const exportDpiInput = document.getElementById('export-dpi');
   const exportButton = document.getElementById('export-figure');
+  const showAxisLabelsCheckbox = document.getElementById('show-axis-labels');
+  const includeUnitsCheckbox = document.getElementById('tick-labels-include-units');
+  const formatDecimalsInput = document.getElementById('format-decimals');
   if (primaryUnit) {
     primaryUnit.value = appState.primaryUnit;
     primaryUnit.addEventListener('change', () => {
@@ -172,9 +178,25 @@ function bindControls() {
       unitLabel.className = 'control';
       unitLabel.innerHTML = '<span>Unit</span>';
       const unitSel = document.createElement('select');
-      ['eV','Hz','K','J'].forEach(u => {
+      const unitOptions = [
+        ['eV','eV (electronvolt)'],
+        ['Hz','Hz (hertz)'],
+        ['K','K (kelvin)'],
+        ['J','J (joule)'],
+        ['m','m (wavelength)'],
+        ['m^-1','m⁻¹ (wavenumber)'],
+        ['rad/m','rad/m (ang. wavenumber)'],
+        ['erg','erg (cgs)'],
+        ['kg','kg (mass)'],
+        ['s','s (time)'],
+        ['Wh','Wh (watt-hour)'],
+        ['Ws','Ws (watt-second)'],
+        ['cal','cal (calorie)'],
+        ['tTNT','t TNT (tonne TNT)'],
+      ];
+      unitOptions.forEach(([value, text]) => {
         const opt = document.createElement('option');
-        opt.value = u; opt.textContent = u; if (axis.unit === u) opt.selected = true; unitSel.appendChild(opt);
+        opt.value = value; opt.textContent = text; if (axis.unit === value) opt.selected = true; unitSel.appendChild(opt);
       });
       unitSel.addEventListener('change', () => {
         axis.unit = unitSel.value;
@@ -186,10 +208,24 @@ function bindControls() {
       prefixLabel.className = 'control';
       prefixLabel.innerHTML = '<span>Prefix</span>';
       const prefixSel = document.createElement('select');
-      const prefixes = ['', 'T','G','M','k','m','µ','n','p','f'];
-      prefixes.forEach(p => {
+      const prefixes = [
+        ['', '(none)'],
+        ['Z','Z (zetta)'],
+        ['E','E (exa)'],
+        ['P','P (peta)'],
+        ['T','T (tera)'],
+        ['G','G (giga)'],
+        ['M','M (mega)'],
+        ['k','k (kilo)'],
+        ['m','m (milli)'],
+        ['µ','µ (micro)'],
+        ['n','n (nano)'],
+        ['p','p (pico)'],
+        ['f','f (femto)'],
+      ];
+      prefixes.forEach(([val, text]) => {
         const opt = document.createElement('option');
-        opt.value = p; opt.textContent = p || '(none)'; if (axis.prefix === p) opt.selected = true; prefixSel.appendChild(opt);
+        opt.value = val; opt.textContent = text; if (axis.prefix === val) opt.selected = true; prefixSel.appendChild(opt);
       });
       prefixSel.addEventListener('change', () => {
         axis.prefix = prefixSel.value;
@@ -299,6 +335,35 @@ function bindControls() {
   }
   if (exportButton) {
     exportButton.addEventListener('click', exportFigure);
+  }
+
+  // Axis title labels visibility
+  if (showAxisLabelsCheckbox) {
+    showAxisLabelsCheckbox.checked = appState.showAxisLabels;
+    showAxisLabelsCheckbox.addEventListener('change', () => {
+      appState.showAxisLabels = showAxisLabelsCheckbox.checked;
+      renderPlot(appState);
+    });
+  }
+  // Include units in tick labels
+  if (includeUnitsCheckbox) {
+    includeUnitsCheckbox.checked = appState.tickLabelsIncludeUnits;
+    includeUnitsCheckbox.addEventListener('change', () => {
+      appState.tickLabelsIncludeUnits = includeUnitsCheckbox.checked;
+      renderPlot(appState);
+    });
+  }
+
+  // Decimal places for formatting
+  if (formatDecimalsInput) {
+    formatDecimalsInput.value = String(appState.formatDecimals);
+    formatDecimalsInput.addEventListener('change', () => {
+      let v = Number(formatDecimalsInput.value);
+      if (!isFinite(v)) v = 2;
+      v = Math.max(0, Math.min(6, Math.floor(v)));
+      appState.formatDecimals = v;
+      renderPlot(appState);
+    });
   }
 }
 

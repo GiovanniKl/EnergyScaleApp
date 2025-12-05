@@ -87,15 +87,32 @@ function formatK(K) {
   return `${Number(K).toExponential(2)} K`;
 }
 
-function formatUnitValue(unit, value, prefix = '') {
+function formatUnitValue(unit, value, prefix = '', decimals = 2) {
   const f = typeof prefixFactor === 'function' ? prefixFactor(prefix) : 1;
   const scaled = value / f;
   switch (unit) {
-    case 'eV': return `${Number(scaled).toExponential(2)} ${prefix}eV`;
-    case 'Hz': return `${Number(scaled).toExponential(2)} ${prefix}Hz`;
-    case 'K': return `${Number(scaled).toExponential(2)} ${prefix}K`;
-    case 'J': default: return `${Number(scaled).toExponential(2)} ${prefix}J`;
+    case 'eV': return `${Number(scaled).toExponential(decimals)} ${prefix}eV`;
+    case 'Hz': return `${Number(scaled).toExponential(decimals)} ${prefix}Hz`;
+    case 'K': return `${Number(scaled).toExponential(decimals)} ${prefix}K`;
+    case 'J': return `${Number(scaled).toExponential(decimals)} ${prefix}J`;
+    case 'm': return `${Number(scaled).toExponential(decimals)} ${prefix}m`;
+    case 'm^-1': return `${Number(scaled).toExponential(decimals)} ${prefix}m⁻¹`;
+    case 'rad/m': return `${Number(scaled).toExponential(decimals)} ${prefix}rad/m`;
+    case 'erg': return `${Number(scaled).toExponential(decimals)} ${prefix}erg`;
+    case 'kg': return `${Number(scaled).toExponential(decimals)} ${prefix}kg`;
+    case 's': return `${Number(scaled).toExponential(decimals)} ${prefix}s`;
+    case 'Wh': return `${Number(scaled).toExponential(decimals)} ${prefix}Wh`;
+    case 'Ws': return `${Number(scaled).toExponential(decimals)} ${prefix}Ws`;
+    case 'cal': return `${Number(scaled).toExponential(decimals)} ${prefix}cal`;
+    case 'tTNT': return `${Number(scaled).toExponential(decimals)} ${prefix}t TNT`;
+    default: return `${Number(scaled).toExponential(decimals)} ${prefix}${unit}`;
   }
+}
+
+function formatValueNoUnit(unit, value, prefix = '', decimals = 2) {
+  const f = typeof prefixFactor === 'function' ? prefixFactor(prefix) : 1;
+  const scaled = value / f;
+  return `${Number(scaled).toExponential(decimals)}`;
 }
 
 function axisTitleForUnit(unit, prefix = '') {
@@ -103,7 +120,18 @@ function axisTitleForUnit(unit, prefix = '') {
     case 'Hz': return `Frequency (${prefix}Hz)`;
     case 'K': return `Temperature (${prefix}K)`;
     case 'eV': return `Energy (${prefix}eV)`;
-    case 'J': default: return `Energy (${prefix}J)`;
+    case 'J': return `Energy (${prefix}J)`;
+    case 'm': return `Wavelength (${prefix}m)`;
+    case 'm^-1': return `Wavenumber (${prefix}m⁻¹)`;
+    case 'rad/m': return `Wavenumber (${prefix}rad/m)`;
+    case 'erg': return `Energy (${prefix}erg)`;
+    case 'kg': return `Mass (${prefix}kg)`;
+    case 's': return `Time (${prefix}s)`;
+    case 'Wh': return `Energy (${prefix}Wh)`;
+    case 'Ws': return `Energy (${prefix}Ws)`;
+    case 'cal': return `Energy (${prefix}cal)`;
+    case 'tTNT': return `Energy (${prefix}t TNT)`;
+    default: return `${unit} (${prefix}${unit})`;
   }
 }
 
@@ -115,6 +143,9 @@ function buildLayout(Jmin, Jmax, appState) {
   const primaryPrefix = appState?.primaryPrefix ?? '';
   const scale = appState?.scale ?? 'log10';
   const independentTickCount = appState?.independentTickCount ?? 0;
+  const showAxisLabels = appState?.showAxisLabels ?? true;
+  const includeUnits = appState?.tickLabelsIncludeUnits ?? true;
+  const decimals = appState?.formatDecimals ?? 2;
   const isLog = scale === 'log10';
 
   const autoLinearCount = 6;
@@ -125,7 +156,11 @@ function buildLayout(Jmin, Jmax, appState) {
   let primaryTickText;
 
   // Primary axis tick labels in selected primary unit/prefix
-  primaryTickText = jTicks.map(J => formatUnitValue(primaryUnit, UNIT_MAP[primaryUnit].fromJ(J), primaryPrefix));
+  primaryTickText = jTicks.map(J => {
+    const val = UNIT_MAP[primaryUnit].fromJ(J);
+    return includeUnits ? formatUnitValue(primaryUnit, val, primaryPrefix, decimals)
+                        : formatValueNoUnit(primaryUnit, val, primaryPrefix, decimals);
+  });
 
   const axesCount = axes.length;
   const spacingPx = 70; // desired pixel spacing between axes (including gap to primary)
@@ -142,7 +177,7 @@ function buildLayout(Jmin, Jmax, appState) {
     font: { family: appState?.figureFont || 'system-ui' },
 
     xaxis: {
-      title: { text: axisTitleForUnit(primaryUnit, primaryPrefix) },
+      title: { text: showAxisLabels ? axisTitleForUnit(primaryUnit, primaryPrefix) : '' },
       type: isLog ? 'log' : 'linear',
       range: isLog ? [Math.log10(Jmin), Math.log10(Jmax)] : [Jmin, Jmax],
       tickmode: 'array',
@@ -182,14 +217,19 @@ function buildLayout(Jmin, Jmax, appState) {
       const uMax = UNIT_MAP[ax.unit].fromJ(Jmax);
       const unitTicks = generateIndependentUnitTicks(uMin, uMax, isLog, linearCount);
       tickvalsJ = unitTicks.map(v => UNIT_MAP[ax.unit].toJ(v));
-      ticktext = unitTicks.map(v => formatUnitValue(ax.unit, v, ax.prefix));
+      ticktext = unitTicks.map(v => includeUnits ? formatUnitValue(ax.unit, v, ax.prefix, decimals)
+                                                : formatValueNoUnit(ax.unit, v, ax.prefix, decimals));
     } else {
       tickvalsJ = jTicks;
-      ticktext = jTicks.map(J => formatUnitValue(ax.unit, UNIT_MAP[ax.unit].fromJ(J), ax.prefix));
+      ticktext = jTicks.map(J => {
+        const val = UNIT_MAP[ax.unit].fromJ(J);
+        return includeUnits ? formatUnitValue(ax.unit, val, ax.prefix, decimals)
+                            : formatValueNoUnit(ax.unit, val, ax.prefix, decimals);
+      });
     }
 
     layout[axisName] = {
-      title: { text: axisTitleForUnit(ax.unit, ax.prefix), standoff: 6 },
+      title: { text: showAxisLabels ? axisTitleForUnit(ax.unit, ax.prefix) : '', standoff: 6 },
       overlaying: 'x',
       side: 'bottom',
       type: isLog ? 'log' : 'linear',

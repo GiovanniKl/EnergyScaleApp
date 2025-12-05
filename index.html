@@ -32,25 +32,38 @@
             <label class="control">
               <span>Unit</span>
               <select id="primary-unit">
-                <option value="J" selected>J</option>
-                <option value="eV">eV</option>
-                <option value="Hz">Hz</option>
-                <option value="K">K</option>
+                <option value="J" selected>J (joule)</option>
+                <option value="eV">eV (electronvolt)</option>
+                <option value="Hz">Hz (hertz)</option>
+                <option value="K">K (kelvin)</option>
+                <option value="m">m (wavelength)</option>
+                <option value="m^-1">m⁻¹ (wavenumber)</option>
+                <option value="rad/m">rad/m (ang. wavenumber)</option>
+                <option value="erg">erg (cgs)</option>
+                <option value="kg">kg (mass)</option>
+                <option value="s">s (time)</option>
+                <option value="Wh">Wh (watt-hour)</option>
+                <option value="Ws">Ws (watt-second)</option>
+                <option value="cal">cal (calorie)</option>
+                <option value="tTNT">t TNT (tonne TNT)</option>
               </select>
             </label>
             <label class="control">
               <span>Prefix</span>
               <select id="primary-prefix">
                 <option value="">(none)</option>
-                <option value="T">T</option>
-                <option value="G">G</option>
-                <option value="M">M</option>
-                <option value="k">k</option>
-                <option value="m">m</option>
-                <option value="µ">µ</option>
-                <option value="n">n</option>
-                <option value="p">p</option>
-                <option value="f">f</option>
+                <option value="Z">Z (zetta)</option>
+                <option value="E">E (exa)</option>
+                <option value="P">P (peta)</option>
+                <option value="T">T (tera)</option>
+                <option value="G">G (giga)</option>
+                <option value="M">M (mega)</option>
+                <option value="k">k (kilo)</option>
+                <option value="m">m (milli)</option>
+                <option value="µ">µ (micro)</option>
+                <option value="n">n (nano)</option>
+                <option value="p">p (pico)</option>
+                <option value="f">f (femto)</option>
               </select>
             </label>
             <div class="range-row">
@@ -126,6 +139,18 @@
               <input type="number" id="export-dpi" min="72" max="600" step="1" value="150" title="DPI resolution for PNG export" />
             </label>
             <button id="export-figure" type="button">Export</button>
+            <label class="control" title="Show/hide axis title labels like 'Energy (J)'"><
+              <input type="checkbox" id="show-axis-labels" checked />
+              <span>Show axis labels</span>
+            </label>
+            <label class="control" title="Include unit symbols in tick labels">
+              <input type="checkbox" id="tick-labels-include-units" checked />
+              <span>Include units in tick labels</span>
+            </label>
+            <label class="control" title="Number of decimal places in scientific notation">
+              <span>Decimals</span>
+              <input type="number" id="format-decimals" min="0" max="6" step="1" value="2" />
+            </label>
           </div>
         </section>
       </aside>

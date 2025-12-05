@@ -35,6 +35,66 @@ const UNIT_MAP = {
   eV: { toJ: eV_to_J, fromJ: J_to_eV, label: 'Energy (eV)' },
   Hz: { toJ: Hz_to_J, fromJ: J_to_Hz, label: 'Frequency (Hz)' },
   K: { toJ: K_to_J, fromJ: J_to_K, label: 'Temperature (K)' },
+  // Free-space wavelength λ [m]: E = h c / λ
+  m: {
+    toJ: (lambda_m) => (lambda_m > 0 ? (CONSTANTS.h * CONSTANTS.c) / lambda_m : NaN),
+    fromJ: (J) => (J > 0 ? (CONSTANTS.h * CONSTANTS.c) / J : NaN),
+    label: 'Wavelength (m)'
+  },
+  // Wavenumber κ [m^-1]: κ = 1/λ, so E = h c κ
+  'm^-1': {
+    toJ: (inv_m) => inv_m * CONSTANTS.h * CONSTANTS.c,
+    fromJ: (J) => J / (CONSTANTS.h * CONSTANTS.c),
+    label: 'Wavenumber (m⁻¹)'
+  },
+  // Angular wavenumber k [rad/m]: k = 2π/λ, so E = h c k / (2π)
+  'rad/m': {
+    toJ: (rad_per_m) => (rad_per_m * CONSTANTS.h * CONSTANTS.c) / (2 * Math.PI),
+    fromJ: (J) => (J * (2 * Math.PI)) / (CONSTANTS.h * CONSTANTS.c),
+    label: 'Wavenumber (rad/m)'
+  },
+  // Erg: 1 erg = 1e-7 J
+  erg: {
+    toJ: (erg) => erg * 1e-7,
+    fromJ: (J) => J / 1e-7,
+    label: 'Energy (erg)'
+  },
+  // Mass via E = m c^2
+  kg: {
+    toJ: (kg) => kg * CONSTANTS.c * CONSTANTS.c,
+    fromJ: (J) => J / (CONSTANTS.c * CONSTANTS.c),
+    label: 'Mass (kg)'
+  },
+  // Time via f = 1/t => E = h / t
+  s: {
+    toJ: (seconds) => (seconds > 0 ? CONSTANTS.h / seconds : NaN),
+    fromJ: (J) => (J > 0 ? CONSTANTS.h / J : NaN),
+    label: 'Time (s)'
+  },
+  // Watt-hour: 1 Wh = 3600 J
+  Wh: {
+    toJ: (wh) => wh * 3600,
+    fromJ: (J) => J / 3600,
+    label: 'Energy (Wh)'
+  },
+  // Watt-second: 1 Ws = 1 J
+  Ws: {
+    toJ: (ws) => ws * 1,
+    fromJ: (J) => J / 1,
+    label: 'Energy (Ws)'
+  },
+  // Calories (small calorie): 1 cal = 4.184 J
+  cal: {
+    toJ: (cal) => cal * 4.184,
+    fromJ: (J) => J / 4.184,
+    label: 'Energy (cal)'
+  },
+  // TNT tonnes: 1 tonne TNT ≈ 4.184e9 J
+  tTNT: {
+    toJ: (t) => t * 4.184e9,
+    fromJ: (J) => J / 4.184e9,
+    label: 'Energy (t TNT)'
+  },
 };
 
 function convert(value, fromUnit, toUnit) {
@@ -45,6 +105,9 @@ function convert(value, fromUnit, toUnit) {
 // SI-like prefix factors
 const PREFIX_FACTOR = {
   '': 1,
+  Z: 1e21, // zetta
+  E: 1e18, // exa
+  P: 1e15, // peta
   T: 1e12,
   G: 1e9,
   M: 1e6,
