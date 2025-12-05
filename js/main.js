@@ -217,6 +217,7 @@ function bindControls() {
         ['G','G (giga)'],
         ['M','M (mega)'],
         ['k','k (kilo)'],
+        ['c','c (centi)'],
         ['m','m (milli)'],
         ['µ','µ (micro)'],
         ['n','n (nano)'],

@@ -105,6 +105,7 @@ function convert(value, fromUnit, toUnit) {
 // SI-like prefix factors
 const PREFIX_FACTOR = {
   '': 1,
+  c: 1e-2,
   Z: 1e21, // zetta
   E: 1e18, // exa
   P: 1e15, // peta
