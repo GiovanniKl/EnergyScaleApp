@@ -9,111 +9,98 @@
   </head>
   <body>
     <header>
-      <h1>Energy Scale Demo (Phase 1: Static Prototype)</h1>
-      <p>Joule (bottom) and selectable unit (top). Toggle independent ticks.</p>
+      <h1>Energy Scale Demo</h1>
     </header>
 
-    <main>
-      <section class="control-panel" aria-label="Controls">
-        <div class="group">
-          <strong>Scale</strong>
-          <label class="control radio">
-            <input type="radio" name="scale" value="log10" id="scale-log" checked />
-            <span>log10</span>
-          </label>
-          <label class="control radio">
-            <input type="radio" name="scale" value="linear" id="scale-linear" />
-            <span>linear</span>
-          </label>
-        </div>
-
-        <div class="group">
-          <strong>Primary axis</strong>
-          <label class="control">
-            <span>Unit</span>
-            <select id="primary-unit">
-              <option value="J" selected>J</option>
-              <option value="eV">eV</option>
-              <option value="Hz">Hz</option>
-              <option value="K">K</option>
-            </select>
-          </label>
-          <label class="control">
-            <span>Prefix</span>
-            <select id="primary-prefix">
-              <option value="">(none)</option>
-              <option value="T">T</option>
-              <option value="G">G</option>
-              <option value="M">M</option>
-              <option value="k">k</option>
-              <option value="m">m</option>
-              <option value="µ">µ</option>
-              <option value="n">n</option>
-              <option value="p">p</option>
-              <option value="f">f</option>
-            </select>
-          </label>
-          <div class="range-row">
-            <label class="control">
-              <span>Min</span>
-              <input type="number" id="range-min" step="any" />
+    <div class="app-shell">
+      <aside class="sidebar" aria-label="Settings">
+        <section class="control-panel" aria-label="Controls">
+          <div class="group">
+            <strong>Scale</strong>
+            <label class="control radio">
+              <input type="radio" name="scale" value="log10" id="scale-log" checked />
+              <span>log10</span>
             </label>
-            <label class="control">
-              <span>Max</span>
-              <input type="number" id="range-max" step="any" />
+            <label class="control radio">
+              <input type="radio" name="scale" value="linear" id="scale-linear" />
+              <span>linear</span>
             </label>
-            <button id="apply-minmax" type="button">Apply Min/Max</button>
           </div>
-          <div class="range-row">
-            <label class="control">
-              <span>Center</span>
-              <input type="number" id="range-center" step="any" />
-            </label>
-            <label class="control">
-              <span>Span</span>
-              <input type="number" id="range-span" step="any" />
-            </label>
-            <button id="apply-centerspan" type="button">Apply Center/Span</button>
-          </div>
-        </div>
 
-        <div class="group">
-          <strong>Top axis</strong>
-          <label class="control">
-            <span>Unit</span>
-            <select id="unit-select">
-              <option value="eV" selected>eV</option>
-              <option value="Hz">Hz</option>
-              <option value="K">K</option>
-            </select>
-          </label>
-          <label class="control">
-            <span>Prefix</span>
-            <select id="top-prefix">
-              <option value="">(none)</option>
-              <option value="T">T</option>
-              <option value="G">G</option>
-              <option value="M">M</option>
-              <option value="k">k</option>
-              <option value="m">m</option>
-              <option value="µ">µ</option>
-              <option value="n">n</option>
-              <option value="p">p</option>
-              <option value="f">f</option>
-            </select>
-          </label>
-          <label class="control checkbox">
-            <input type="checkbox" id="independent-ticks" />
-            <span>Independent ticks</span>
-          </label>
-          <label class="control" title="Only applies in linear scale; ignored in log10">
-            <span title="Only applies in linear scale; ignored in log10">Independent tick count</span>
-            <input type="number" id="independent-tick-count" min="0" step="1" value="0" title="Only applies in linear scale; ignored in log10" />
-          </label>
-        </div>
-      </section>
-      <div id="plot" aria-label="Energy scale plot"></div>
-    </main>
+          <div class="group">
+            <strong>Primary axis</strong>
+            <label class="control">
+              <span>Unit</span>
+              <select id="primary-unit">
+                <option value="J" selected>J</option>
+                <option value="eV">eV</option>
+                <option value="Hz">Hz</option>
+                <option value="K">K</option>
+              </select>
+            </label>
+            <label class="control">
+              <span>Prefix</span>
+              <select id="primary-prefix">
+                <option value="">(none)</option>
+                <option value="T">T</option>
+                <option value="G">G</option>
+                <option value="M">M</option>
+                <option value="k">k</option>
+                <option value="m">m</option>
+                <option value="µ">µ</option>
+                <option value="n">n</option>
+                <option value="p">p</option>
+                <option value="f">f</option>
+              </select>
+            </label>
+            <div class="range-row">
+              <label class="control">
+                <span>Min</span>
+                <input type="number" id="range-min" step="any" />
+              </label>
+              <label class="control">
+                <span>Max</span>
+                <input type="number" id="range-max" step="any" />
+              </label>
+              <button id="apply-minmax" type="button">Apply Min/Max</button>
+            </div>
+            <div class="range-row">
+              <label class="control">
+                <span>Center</span>
+                <input type="number" id="range-center" step="any" />
+              </label>
+              <label class="control">
+                <span>Span</span>
+                <input type="number" id="range-span" step="any" />
+              </label>
+              <button id="apply-centerspan" type="button">Apply Center/Span</button>
+            </div>
+          </div>
+
+          <div class="group">
+            <strong>Ticking</strong>
+            <label class="control checkbox">
+              <input type="checkbox" id="independent-ticks" />
+              <span>Independent ticks</span>
+            </label>
+            <label class="control" title="Only applies in linear scale; ignored in log10">
+              <span title="Only applies in linear scale; ignored in log10">Independent tick count</span>
+              <input type="number" id="independent-tick-count" min="0" step="1" value="0" title="Only applies in linear scale; ignored in log10" />
+            </label>
+          </div>
+
+          <div class="group">
+            <strong>Axes</strong>
+            <div id="axes-list" class="axes-list"></div>
+            <button id="add-axis" type="button">+ Add axis</button>
+          </div>
+        </section>
+      </aside>
+
+      <main class="main-panel">
+        <div id="plot" aria-label="Energy scale plot"></div>
+      </main>
+    </div>
 
     <script src="js/conversions.js"></script>
     <script src="js/plot.js"></script>

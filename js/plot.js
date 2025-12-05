@@ -109,7 +109,7 @@ function axisTitleForUnit(unit, prefix = '') {
 
 function buildLayout(Jmin, Jmax, appState) {
   const topUnit = appState?.topUnit ?? 'eV';
-  const topPrefix = appState?.topPrefix ?? '';
+  const axes = Array.isArray(appState?.axes) ? appState.axes : [];
   const independentTicks = !!appState?.independentTicks;
   const primaryUnit = appState?.primaryUnit ?? 'J';
   const primaryPrefix = appState?.primaryPrefix ?? '';
@@ -124,22 +124,16 @@ function buildLayout(Jmin, Jmax, appState) {
   let topTickText;
   let primaryTickText;
 
-  if (independentTicks) {
-    // Generate interior ticks in unit space, then map to J positions for tickvals
-    const uMin = UNIT_MAP[topUnit].fromJ(Jmin);
-    const uMax = UNIT_MAP[topUnit].fromJ(Jmax);
-    const unitTicks = generateIndependentUnitTicks(uMin, uMax, isLog, linearCount);
-    topTickValsJ = unitTicks.map(v => UNIT_MAP[topUnit].toJ(v));
-    topTickText = unitTicks.map(v => formatUnitValue(topUnit, v, topPrefix));
-  } else {
-    topTickValsJ = jTicks;
-    topTickText = jTicks.map(J => formatUnitValue(topUnit, UNIT_MAP[topUnit].fromJ(J), topPrefix));
-  }
-
   // Primary axis tick labels in selected primary unit/prefix
   primaryTickText = jTicks.map(J => formatUnitValue(primaryUnit, UNIT_MAP[primaryUnit].fromJ(J), primaryPrefix));
 
-  return {
+  const axesCount = axes.length;
+  const spacingPx = 70; // desired pixel spacing between axes (including gap to primary)
+  const baseHeight = 150;
+  // Add spacing per overlay axis and one extra spacing below the stack so
+  // the bottom-most secondary is also separated from the primary by spacingPx
+  const layoutHeight = baseHeight + spacingPx * (axesCount > 0 ? axesCount : 0);
+  const layout = {
     margin: { l: 40, r: 40, t: 100, b: 50 },
     showlegend: false,
     hovermode: false,
@@ -166,16 +160,42 @@ function buildLayout(Jmin, Jmax, appState) {
       ticklabelposition: 'outside bottom',
     },
 
-    xaxis2: {
-      title: { text: axisTitleForUnit(topUnit, topPrefix), standoff: 6 },
+    yaxis: {
+      visible: false,
+      range: [-1, 1]
+    },
+    height: layoutHeight,
+  };
+
+  // Build overlay axes based on appState.axes
+  const baseRange = isLog ? [Math.log10(Jmin), Math.log10(Jmax)] : [Jmin, Jmax];
+  const plotAreaHeightPx = layoutHeight - layout.margin.t - layout.margin.b;
+  // Use exact pixel->normalized conversion so spacing stays constant across counts
+  const posStep = spacingPx / Math.max(plotAreaHeightPx, 1);
+  axes.forEach((ax, i) => {
+    const axisName = 'xaxis' + (i + 2);
+    // Compute ticks for this axis
+    let tickvalsJ, ticktext;
+    if (independentTicks) {
+      const uMin = UNIT_MAP[ax.unit].fromJ(Jmin);
+      const uMax = UNIT_MAP[ax.unit].fromJ(Jmax);
+      const unitTicks = generateIndependentUnitTicks(uMin, uMax, isLog, linearCount);
+      tickvalsJ = unitTicks.map(v => UNIT_MAP[ax.unit].toJ(v));
+      ticktext = unitTicks.map(v => formatUnitValue(ax.unit, v, ax.prefix));
+    } else {
+      tickvalsJ = jTicks;
+      ticktext = jTicks.map(J => formatUnitValue(ax.unit, UNIT_MAP[ax.unit].fromJ(J), ax.prefix));
+    }
+
+    layout[axisName] = {
+      title: { text: axisTitleForUnit(ax.unit, ax.prefix), standoff: 6 },
       overlaying: 'x',
-      // Draw the axis at the top edge but place ticks/labels below the axis line
       side: 'bottom',
       type: isLog ? 'log' : 'linear',
-      range: isLog ? [Math.log10(Jmin), Math.log10(Jmax)] : [Jmin, Jmax],
+      range: baseRange,
       tickmode: 'array',
-      tickvals: topTickValsJ,
-      ticktext: topTickText,
+      tickvals: tickvalsJ,
+      ticktext,
       showgrid: false,
       showline: true,
       showticklabels: true,
@@ -187,23 +207,18 @@ function buildLayout(Jmin, Jmax, appState) {
       zeroline: false,
       linecolor: '#334155',
       mirror: false,
-      // Force rendering at the top edge
       anchor: 'free',
-      position: 1,
+      position: Math.max(0, 1 - i * posStep),
       layer: 'above traces',
       ticklabeloverflow: 'allow',
       ticklabelposition: 'outside bottom',
-    },
+    };
+  });
 
-    yaxis: {
-      visible: false,
-      range: [-1, 1]
-    },
-    height: 440,
-  };
+  return layout;
 }
 
-function buildData(Jmin, Jmax) {
+function buildData(Jmin, Jmax, appState) {
   const baseTrace = {
     x: [Jmin, Jmax],
     y: [0, 0],
@@ -215,25 +230,29 @@ function buildData(Jmin, Jmax) {
     showlegend: false,
   };
 
-  const topTrace = {
-    x: [Jmin, Jmax],
-    y: [0, 0],
-    mode: 'lines',
-    line: { color: 'rgba(0,0,0,0)' },
-    hoverinfo: 'skip',
-    xaxis: 'x2',
-    yaxis: 'y',
-    showlegend: false,
-  };
+  const traces = [baseTrace];
+  const axes = Array.isArray(appState?.axes) ? appState.axes : [];
+  axes.forEach((ax, i) => {
+    traces.push({
+      x: [Jmin, Jmax],
+      y: [0, 0],
+      mode: 'lines',
+      line: { color: 'rgba(0,0,0,0)' },
+      hoverinfo: 'skip',
+      xaxis: 'x' + (i + 2),
+      yaxis: 'y',
+      showlegend: false,
+    });
+  });
 
-  return [baseTrace, topTrace];
+  return traces;
 }
 
 function renderPlot(appState) {
   const Jmin = appState?.Jmin ?? 1e-25;
   const Jmax = appState?.Jmax ?? 1e-15;
   const layout = buildLayout(Jmin, Jmax, appState ?? {});
-  const data = buildData(Jmin, Jmax);
+  const data = buildData(Jmin, Jmax, appState ?? {});
   const config = { displayModeBar: false, responsive: true };
   Plotly.newPlot('plot', data, layout, config);
 }

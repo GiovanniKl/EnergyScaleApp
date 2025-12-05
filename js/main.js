@@ -1,8 +1,9 @@
 const appState = {
   Jmin: 1e-25,
   Jmax: 1e-15,
-  topUnit: 'eV',
-  topPrefix: '',
+  axes: [
+    { id: 1, unit: 'eV', prefix: '' },
+  ],
   primaryUnit: 'J',
   primaryPrefix: '',
   scale: 'log10',
@@ -11,9 +12,7 @@ const appState = {
 };
 
 function bindControls() {
-  const unitSelect = document.getElementById('unit-select');
   const independent = document.getElementById('independent-ticks');
-  const topPrefix = document.getElementById('top-prefix');
   const primaryUnit = document.getElementById('primary-unit');
   const primaryPrefix = document.getElementById('primary-prefix');
   const scaleLog = document.getElementById('scale-log');
@@ -25,20 +24,8 @@ function bindControls() {
   const applyMinMax = document.getElementById('apply-minmax');
   const applyCenterSpan = document.getElementById('apply-centerspan');
   const indepTickCountInput = document.getElementById('independent-tick-count');
-  if (unitSelect) {
-    unitSelect.value = appState.topUnit;
-    unitSelect.addEventListener('change', () => {
-      appState.topUnit = unitSelect.value;
-      renderPlot(appState);
-    });
-  }
-  if (topPrefix) {
-    topPrefix.value = appState.topPrefix;
-    topPrefix.addEventListener('change', () => {
-      appState.topPrefix = topPrefix.value;
-      renderPlot(appState);
-    });
-  }
+  const axesList = document.getElementById('axes-list');
+  const addAxisBtn = document.getElementById('add-axis');
   if (primaryUnit) {
     primaryUnit.value = appState.primaryUnit;
     primaryUnit.addEventListener('change', () => {
@@ -164,9 +151,79 @@ function bindControls() {
   if (minInput && maxInput && centerInput && spanInput) {
     syncRangeInputs();
   }
+
+  function renderAxesList() {
+    if (!axesList) return;
+    axesList.innerHTML = '';
+    appState.axes.forEach((axis, idx) => {
+      const row = document.createElement('div');
+      row.className = 'axis-row';
+      row.dataset.id = String(axis.id);
+
+      const unitLabel = document.createElement('label');
+      unitLabel.className = 'control';
+      unitLabel.innerHTML = '<span>Unit</span>';
+      const unitSel = document.createElement('select');
+      ['eV','Hz','K','J'].forEach(u => {
+        const opt = document.createElement('option');
+        opt.value = u; opt.textContent = u; if (axis.unit === u) opt.selected = true; unitSel.appendChild(opt);
+      });
+      unitSel.addEventListener('change', () => {
+        axis.unit = unitSel.value;
+        renderPlot(appState);
+      });
+      unitLabel.appendChild(unitSel);
+
+      const prefixLabel = document.createElement('label');
+      prefixLabel.className = 'control';
+      prefixLabel.innerHTML = '<span>Prefix</span>';
+      const prefixSel = document.createElement('select');
+      const prefixes = ['', 'T','G','M','k','m','µ','n','p','f'];
+      prefixes.forEach(p => {
+        const opt = document.createElement('option');
+        opt.value = p; opt.textContent = p || '(none)'; if (axis.prefix === p) opt.selected = true; prefixSel.appendChild(opt);
+      });
+      prefixSel.addEventListener('change', () => {
+        axis.prefix = prefixSel.value;
+        renderPlot(appState);
+      });
+      prefixLabel.appendChild(prefixSel);
+
+      const removeBtn = document.createElement('button');
+      removeBtn.type = 'button';
+      removeBtn.className = 'remove-btn';
+      removeBtn.textContent = 'Remove';
+      removeBtn.addEventListener('click', () => {
+        appState.axes = appState.axes.filter(a => a.id !== axis.id);
+        renderAxesList();
+        renderPlot(appState);
+      });
+
+      row.appendChild(unitLabel);
+      row.appendChild(prefixLabel);
+      row.appendChild(removeBtn);
+      axesList.appendChild(row);
+    });
+  }
+
+  if (addAxisBtn) {
+    addAxisBtn.addEventListener('click', () => {
+      const nextId = (appState.axes.reduce((m, a) => Math.max(m, a.id), 0) || 0) + 1;
+      appState.axes.push({ id: nextId, unit: 'eV', prefix: '' });
+      renderAxesList();
+      renderPlot(appState);
+    });
+  }
+
+  // initial render of axes list
+  renderAxesList();
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+  // Ensure at least one overlay axis exists by default
+  if (!Array.isArray(appState.axes) || appState.axes.length === 0) {
+    appState.axes = [{ id: 1, unit: 'eV', prefix: '' }];
+  }
   bindControls();
   renderPlot(appState);
 });
