@@ -37,23 +37,26 @@ function generateLinearTicks(minVal, maxVal, count = 6) {
 }
 
 function generateIndependentUnitTicks(uMin, uMax, isLog, linearCount) {
-  let unitTicks = isLog ? generateDecadeTicks(uMin, uMax) : generateLinearTicks(uMin, uMax, linearCount || 7);
+  // Normalize bounds to handle inverse relationships (e.g., wavelength, time)
+  const lo = Math.min(uMin, uMax);
+  const hi = Math.max(uMin, uMax);
+  let unitTicks = isLog ? generateDecadeTicks(lo, hi) : generateLinearTicks(lo, hi, linearCount || 7);
   // Compute interior ticks only
-  let interior = unitTicks.filter(v => v > uMin * 1.0000001 && v < uMax / 1.0000001);
-  // If none, synthesize evenly spaced interior ticks (linear) or midpoints (log)
+  let interior = unitTicks.filter(v => v > lo * 1.0000001 && v < hi / 1.0000001);
+  // If none, synthesize evenly spaced interior ticks (linear) or a midpoint (log)
   if (interior.length === 0) {
-    if (isLog && uMin > 0 && uMax > 0) {
-      const mid = Math.pow(10, (log10(uMin) + log10(uMax)) / 2);
+    if (isLog && lo > 0 && hi > 0) {
+      const mid = Math.pow(10, (log10(lo) + log10(hi)) / 2);
       interior = [mid];
     } else {
-      // Generate 3 interior linear ticks between uMin and uMax
+      // Generate 3 interior linear ticks between lo and hi
       const count = 4;
-      const step = (uMax - uMin) / count;
+      const step = (hi - lo) / count;
       interior = [];
-      for (let i = 1; i < count; i++) interior.push(uMin + i * step);
+      for (let i = 1; i < count; i++) interior.push(lo + i * step);
     }
   }
-  // Ensure sorted and unique
+  // Ensure sorted and finite
   interior = interior.filter(v => isFinite(v)).sort((a,b) => a - b);
   return interior;
 }
@@ -150,17 +153,52 @@ function buildLayout(Jmin, Jmax, appState) {
 
   const autoLinearCount = 6;
   const linearCount = independentTickCount && independentTickCount > 1 ? independentTickCount : autoLinearCount;
-  const jTicks = isLog ? generateJTicks(Jmin, Jmax) : generateLinearTicks(Jmin, Jmax, linearCount);
-  let topTickValsJ;
-  let topTickText;
-  let primaryTickText;
+  let jTickVals; // tick positions in Joules for Plotly
+  let primaryTickText; // labels formatted in primary unit space
 
-  // Primary axis tick labels in selected primary unit/prefix
-  primaryTickText = jTicks.map(J => {
-    const val = UNIT_MAP[primaryUnit].fromJ(J);
-    return includeUnits ? formatUnitValue(primaryUnit, val, primaryPrefix, decimals)
-                        : formatValueNoUnit(primaryUnit, val, primaryPrefix, decimals);
-  });
+  // Derive primary unit-space range (scaled by prefix for display)
+  const pf = typeof prefixFactor === 'function' ? prefixFactor(primaryPrefix) : 1;
+  const pMin = UNIT_MAP[primaryUnit].fromJ(Jmin);
+  const pMax = UNIT_MAP[primaryUnit].fromJ(Jmax);
+  let uLo = Math.min(pMin / pf, pMax / pf);
+  let uHi = Math.max(pMin / pf, pMax / pf);
+
+  if (isLog) {
+    // Generate in primary unit space if positive; else fall back to Joules
+    if (isFinite(uLo) && isFinite(uHi) && uLo > 0 && uHi > 0) {
+      const pTicksScaled = generateDecadeTicks(uLo, uHi);
+      jTickVals = pTicksScaled.map(v => UNIT_MAP[primaryUnit].toJ(v * pf));
+      primaryTickText = pTicksScaled.map(v => includeUnits ?
+        formatUnitValue(primaryUnit, v * pf, primaryPrefix, decimals) :
+        formatValueNoUnit(primaryUnit, v * pf, primaryPrefix, decimals));
+    } else {
+      const jTicks = generateJTicks(Jmin, Jmax);
+      jTickVals = jTicks;
+      primaryTickText = jTicks.map(J => {
+        const val = UNIT_MAP[primaryUnit].fromJ(J);
+        return includeUnits ? formatUnitValue(primaryUnit, val, primaryPrefix, decimals)
+                            : formatValueNoUnit(primaryUnit, val, primaryPrefix, decimals);
+      });
+    }
+  } else {
+    // Linear scale: generate evenly spaced ticks in primary unit space
+    if (isFinite(uLo) && isFinite(uHi) && uLo !== uHi) {
+      const pTicksScaled = generateLinearTicks(uLo, uHi, linearCount);
+      jTickVals = pTicksScaled.map(v => UNIT_MAP[primaryUnit].toJ(v * pf));
+      primaryTickText = pTicksScaled.map(v => includeUnits ?
+        formatUnitValue(primaryUnit, v * pf, primaryPrefix, decimals) :
+        formatValueNoUnit(primaryUnit, v * pf, primaryPrefix, decimals));
+    } else {
+      // Fallback to Joule-space linear ticks
+      const jTicks = generateLinearTicks(Jmin, Jmax, linearCount);
+      jTickVals = jTicks;
+      primaryTickText = jTicks.map(J => {
+        const val = UNIT_MAP[primaryUnit].fromJ(J);
+        return includeUnits ? formatUnitValue(primaryUnit, val, primaryPrefix, decimals)
+                            : formatValueNoUnit(primaryUnit, val, primaryPrefix, decimals);
+      });
+    }
+  }
 
   const axesCount = axes.length;
   const spacingPx = 70; // desired pixel spacing between axes (including gap to primary)
@@ -181,7 +219,7 @@ function buildLayout(Jmin, Jmax, appState) {
       type: isLog ? 'log' : 'linear',
       range: isLog ? [Math.log10(Jmin), Math.log10(Jmax)] : [Jmin, Jmax],
       tickmode: 'array',
-      tickvals: jTicks,
+      tickvals: jTickVals,
       ticktext: primaryTickText,
       showgrid: !independentTicks,
       gridcolor: '#e2e8f0',
@@ -215,13 +253,15 @@ function buildLayout(Jmin, Jmax, appState) {
     if (independentTicks) {
       const uMin = UNIT_MAP[ax.unit].fromJ(Jmin);
       const uMax = UNIT_MAP[ax.unit].fromJ(Jmax);
-      const unitTicks = generateIndependentUnitTicks(uMin, uMax, isLog, linearCount);
-      tickvalsJ = unitTicks.map(v => UNIT_MAP[ax.unit].toJ(v));
-      ticktext = unitTicks.map(v => includeUnits ? formatUnitValue(ax.unit, v, ax.prefix, decimals)
-                                                : formatValueNoUnit(ax.unit, v, ax.prefix, decimals));
+      const pfa = typeof prefixFactor === 'function' ? prefixFactor(ax.prefix) : 1;
+      const unitTicks = generateIndependentUnitTicks(uMin / pfa, uMax / pfa, isLog, linearCount);
+      tickvalsJ = unitTicks.map(v => UNIT_MAP[ax.unit].toJ(v * pfa));
+      ticktext = unitTicks.map(v => includeUnits ? formatUnitValue(ax.unit, v * pfa, ax.prefix, decimals)
+                                                : formatValueNoUnit(ax.unit, v * pfa, ax.prefix, decimals));
     } else {
-      tickvalsJ = jTicks;
-      ticktext = jTicks.map(J => {
+      // Shared ticks: reuse primary tick positions (in Joules)
+      tickvalsJ = jTickVals;
+      ticktext = jTickVals.map(J => {
         const val = UNIT_MAP[ax.unit].fromJ(J);
         return includeUnits ? formatUnitValue(ax.unit, val, ax.prefix, decimals)
                             : formatValueNoUnit(ax.unit, val, ax.prefix, decimals);
