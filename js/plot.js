@@ -139,6 +139,7 @@ function buildLayout(Jmin, Jmax, appState) {
     hovermode: false,
     paper_bgcolor: '#ffffff',
     plot_bgcolor: '#ffffff',
+    font: { family: appState?.figureFont || 'system-ui' },
 
     xaxis: {
       title: { text: axisTitleForUnit(primaryUnit, primaryPrefix) },
@@ -253,6 +254,6 @@ function renderPlot(appState) {
   const Jmax = appState?.Jmax ?? 1e-15;
   const layout = buildLayout(Jmin, Jmax, appState ?? {});
   const data = buildData(Jmin, Jmax, appState ?? {});
-  const config = { displayModeBar: false, responsive: true };
+  const config = { displayModeBar: false, responsive: false };
   Plotly.newPlot('plot', data, layout, config);
 }

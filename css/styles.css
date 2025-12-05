@@ -42,6 +42,10 @@ header p {
   min-height: 320px;
 }
 
+.main-panel #plot {
+  width: var(--plot-width, 100%);
+}
+
 .control-panel {
   display: flex;
   align-items: center;

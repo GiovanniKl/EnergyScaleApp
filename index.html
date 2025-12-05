@@ -94,6 +94,39 @@
             <div id="axes-list" class="axes-list"></div>
             <button id="add-axis" type="button">+ Add axis</button>
           </div>
+
+          <div class="group">
+            <strong>Figure</strong>
+            <label class="control" title="Figure width as % of available space">
+              <span>Width (%)</span>
+              <input type="range" id="figure-width" min="20" max="100" step="1" value="100" />
+              <span id="figure-width-value" aria-live="polite" style="min-width:3ch; text-align:right;">100</span>
+            </label>
+            <label class="control" title="Plot font family">
+              <span>Font</span>
+              <select id="figure-font">
+                <option value="system-ui" selected>System UI</option>
+                <option value="Segoe UI">Segoe UI</option>
+                <option value="Roboto">Roboto</option>
+                <option value="Helvetica">Helvetica</option>
+                <option value="Arial">Arial</option>
+                <option value="Georgia">Georgia</option>
+                <option value="Times New Roman">Times New Roman</option>
+              </select>
+            </label>
+            <label class="control" title="Download exported figure">
+              <span>Export</span>
+              <select id="export-format">
+                <option value="png" selected>PNG</option>
+                <option value="svg">SVG</option>
+              </select>
+            </label>
+            <label class="control">
+              <span>DPI</span>
+              <input type="number" id="export-dpi" min="72" max="600" step="1" value="150" title="DPI resolution for PNG export" />
+            </label>
+            <button id="export-figure" type="button">Export</button>
+          </div>
         </section>
       </aside>
 

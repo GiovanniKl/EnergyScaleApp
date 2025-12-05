@@ -9,6 +9,8 @@ const appState = {
   scale: 'log10',
   independentTicks: false,
   independentTickCount: 0,
+  figureWidthPct: 100,
+  figureFont: 'system-ui',
 };
 
 function bindControls() {
@@ -26,6 +28,12 @@ function bindControls() {
   const indepTickCountInput = document.getElementById('independent-tick-count');
   const axesList = document.getElementById('axes-list');
   const addAxisBtn = document.getElementById('add-axis');
+  const figureWidthInput = document.getElementById('figure-width');
+  const figureWidthValue = document.getElementById('figure-width-value');
+  const figureFontSelect = document.getElementById('figure-font');
+  const exportFormatSelect = document.getElementById('export-format');
+  const exportDpiInput = document.getElementById('export-dpi');
+  const exportButton = document.getElementById('export-figure');
   if (primaryUnit) {
     primaryUnit.value = appState.primaryUnit;
     primaryUnit.addEventListener('change', () => {
@@ -217,6 +225,81 @@ function bindControls() {
 
   // initial render of axes list
   renderAxesList();
+
+  // Figure width binding
+  function applyFigureWidth() {
+    const pct = Math.min(100, Math.max(20, Number(figureWidthInput.value)));
+    appState.figureWidthPct = pct;
+    const plotEl = document.getElementById('plot');
+    if (plotEl) {
+      plotEl.style.setProperty('--plot-width', pct + '%');
+      // If plot initialized, update only width to avoid height jumps
+      if (plotEl._fullLayout && window.Plotly && typeof Plotly.relayout === 'function') {
+        // Wait a frame so CSS width takes effect, then set plot width only
+        requestAnimationFrame(() => {
+          const rect = plotEl.getBoundingClientRect();
+          const newWidth = Math.max(200, Math.floor(rect.width));
+          Plotly.relayout(plotEl, { width: newWidth });
+        });
+      }
+    }
+    if (figureWidthValue) figureWidthValue.textContent = String(pct);
+  }
+  if (figureWidthInput) {
+    figureWidthInput.value = String(appState.figureWidthPct);
+    applyFigureWidth();
+    const onWidthChange = () => applyFigureWidth();
+    figureWidthInput.addEventListener('input', onWidthChange);
+    figureWidthInput.addEventListener('change', onWidthChange);
+  }
+
+  // Figure font binding
+  if (figureFontSelect) {
+    figureFontSelect.value = appState.figureFont;
+    figureFontSelect.addEventListener('change', () => {
+      appState.figureFont = figureFontSelect.value;
+      renderPlot(appState);
+    });
+  }
+
+  // Export handling
+  // Toggle DPI input enabled/disabled based on format (PNG uses DPI, SVG ignores)
+  function syncExportDpiEnabled() {
+    if (!exportDpiInput) return;
+    const fmt = exportFormatSelect ? exportFormatSelect.value : 'png';
+    const isSvg = fmt === 'svg';
+    exportDpiInput.disabled = isSvg;
+  }
+  if (exportFormatSelect) {
+    exportFormatSelect.addEventListener('change', () => {
+      syncExportDpiEnabled();
+    });
+    // Initialize state
+    syncExportDpiEnabled();
+  }
+
+  function exportFigure() {
+    const fmt = exportFormatSelect ? exportFormatSelect.value : 'png';
+    const scale = exportDpiInput && fmt === 'png' ? Math.max(1, Number(exportDpiInput.value) / 72) : 1;
+    const opts = { format: fmt, scale };
+    // Plotly.downloadImage supports png, svg, jpeg, webp
+    if (window.Plotly && document.getElementById('plot')) {
+      Plotly.downloadImage('plot', opts).catch(() => {
+        // Fallback to toImage + manual download
+        Plotly.toImage('plot', opts).then((dataUrl) => {
+          const a = document.createElement('a');
+          a.href = dataUrl;
+          a.download = 'energy-scale.' + fmt;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+        });
+      });
+    }
+  }
+  if (exportButton) {
+    exportButton.addEventListener('click', exportFigure);
+  }
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -226,4 +309,5 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   bindControls();
   renderPlot(appState);
+  // Avoid triggering an immediate resize after first render to prevent layout jumping.
 });
