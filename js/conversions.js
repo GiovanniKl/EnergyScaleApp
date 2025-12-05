@@ -41,3 +41,21 @@ function convert(value, fromUnit, toUnit) {
   const J = UNIT_MAP[fromUnit].toJ(value);
   return UNIT_MAP[toUnit].fromJ(J);
 }
+
+// SI-like prefix factors
+const PREFIX_FACTOR = {
+  '': 1,
+  T: 1e12,
+  G: 1e9,
+  M: 1e6,
+  k: 1e3,
+  m: 1e-3,
+  'µ': 1e-6,
+  n: 1e-9,
+  p: 1e-12,
+  f: 1e-15,
+};
+
+function prefixFactor(prefix) {
+  return PREFIX_FACTOR[prefix] ?? 1;
+}

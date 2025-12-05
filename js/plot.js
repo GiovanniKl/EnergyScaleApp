@@ -26,6 +26,38 @@ function generateJTicks(Jmin, Jmax) {
   return generateDecadeTicks(Jmin, Jmax);
 }
 
+function generateLinearTicks(minVal, maxVal, count = 6) {
+  const min = Math.min(minVal, maxVal);
+  const max = Math.max(minVal, maxVal);
+  if (!(isFinite(min) && isFinite(max)) || min === max) return [min, max];
+  const step = (max - min) / (count - 1);
+  const ticks = [];
+  for (let i = 0; i < count; i++) ticks.push(min + i * step);
+  return ticks;
+}
+
+function generateIndependentUnitTicks(uMin, uMax, isLog, linearCount) {
+  let unitTicks = isLog ? generateDecadeTicks(uMin, uMax) : generateLinearTicks(uMin, uMax, linearCount || 7);
+  // Compute interior ticks only
+  let interior = unitTicks.filter(v => v > uMin * 1.0000001 && v < uMax / 1.0000001);
+  // If none, synthesize evenly spaced interior ticks (linear) or midpoints (log)
+  if (interior.length === 0) {
+    if (isLog && uMin > 0 && uMax > 0) {
+      const mid = Math.pow(10, (log10(uMin) + log10(uMax)) / 2);
+      interior = [mid];
+    } else {
+      // Generate 3 interior linear ticks between uMin and uMax
+      const count = 4;
+      const step = (uMax - uMin) / count;
+      interior = [];
+      for (let i = 1; i < count; i++) interior.push(uMin + i * step);
+    }
+  }
+  // Ensure sorted and unique
+  interior = interior.filter(v => isFinite(v)).sort((a,b) => a - b);
+  return interior;
+}
+
 function formatJ(J) {
   // Show compact sci-notation with unit
   if (J === 0) return "0 J";
@@ -55,38 +87,57 @@ function formatK(K) {
   return `${Number(K).toExponential(2)} K`;
 }
 
-function formatUnitValue(unit, value) {
+function formatUnitValue(unit, value, prefix = '') {
+  const f = typeof prefixFactor === 'function' ? prefixFactor(prefix) : 1;
+  const scaled = value / f;
   switch (unit) {
-    case 'eV': return formatEV(value);
-    case 'Hz': return formatHz(value);
-    case 'K': return formatK(value);
-    case 'J': default: return formatJ(value);
+    case 'eV': return `${Number(scaled).toExponential(2)} ${prefix}eV`;
+    case 'Hz': return `${Number(scaled).toExponential(2)} ${prefix}Hz`;
+    case 'K': return `${Number(scaled).toExponential(2)} ${prefix}K`;
+    case 'J': default: return `${Number(scaled).toExponential(2)} ${prefix}J`;
   }
 }
 
-function axisTitleForUnit(unit) {
-  if (UNIT_MAP[unit] && UNIT_MAP[unit].label) return UNIT_MAP[unit].label;
-  return 'Energy';
+function axisTitleForUnit(unit, prefix = '') {
+  switch (unit) {
+    case 'Hz': return `Frequency (${prefix}Hz)`;
+    case 'K': return `Temperature (${prefix}K)`;
+    case 'eV': return `Energy (${prefix}eV)`;
+    case 'J': default: return `Energy (${prefix}J)`;
+  }
 }
 
-function buildLayout(Jmin, Jmax, topUnit, independentTicks) {
-  const jTicks = generateJTicks(Jmin, Jmax);
+function buildLayout(Jmin, Jmax, appState) {
+  const topUnit = appState?.topUnit ?? 'eV';
+  const topPrefix = appState?.topPrefix ?? '';
+  const independentTicks = !!appState?.independentTicks;
+  const primaryUnit = appState?.primaryUnit ?? 'J';
+  const primaryPrefix = appState?.primaryPrefix ?? '';
+  const scale = appState?.scale ?? 'log10';
+  const independentTickCount = appState?.independentTickCount ?? 0;
+  const isLog = scale === 'log10';
+
+  const autoLinearCount = 6;
+  const linearCount = independentTickCount && independentTickCount > 1 ? independentTickCount : autoLinearCount;
+  const jTicks = isLog ? generateJTicks(Jmin, Jmax) : generateLinearTicks(Jmin, Jmax, linearCount);
   let topTickValsJ;
   let topTickText;
+  let primaryTickText;
 
   if (independentTicks) {
-    // Generate ticks in unit space, then map to J positions for tickvals
+    // Generate interior ticks in unit space, then map to J positions for tickvals
     const uMin = UNIT_MAP[topUnit].fromJ(Jmin);
     const uMax = UNIT_MAP[topUnit].fromJ(Jmax);
-    let unitTicks = generateDecadeTicks(uMin, uMax);
-    // Remove edge ticks to reduce clutter
-    unitTicks = unitTicks.filter(v => v > uMin * 1.0000001 && v < uMax / 1.0000001);
+    const unitTicks = generateIndependentUnitTicks(uMin, uMax, isLog, linearCount);
     topTickValsJ = unitTicks.map(v => UNIT_MAP[topUnit].toJ(v));
-    topTickText = unitTicks.map(v => formatUnitValue(topUnit, v));
+    topTickText = unitTicks.map(v => formatUnitValue(topUnit, v, topPrefix));
   } else {
     topTickValsJ = jTicks;
-    topTickText = jTicks.map(J => formatUnitValue(topUnit, UNIT_MAP[topUnit].fromJ(J)));
+    topTickText = jTicks.map(J => formatUnitValue(topUnit, UNIT_MAP[topUnit].fromJ(J), topPrefix));
   }
+
+  // Primary axis tick labels in selected primary unit/prefix
+  primaryTickText = jTicks.map(J => formatUnitValue(primaryUnit, UNIT_MAP[primaryUnit].fromJ(J), primaryPrefix));
 
   return {
     margin: { l: 40, r: 40, t: 100, b: 50 },
@@ -96,12 +147,12 @@ function buildLayout(Jmin, Jmax, topUnit, independentTicks) {
     plot_bgcolor: '#ffffff',
 
     xaxis: {
-      title: { text: 'Energy (J)' },
-      type: 'log',
-      range: [Math.log10(Jmin), Math.log10(Jmax)],
+      title: { text: axisTitleForUnit(primaryUnit, primaryPrefix) },
+      type: isLog ? 'log' : 'linear',
+      range: isLog ? [Math.log10(Jmin), Math.log10(Jmax)] : [Jmin, Jmax],
       tickmode: 'array',
       tickvals: jTicks,
-      ticktext: jTicks.map(formatJ),
+      ticktext: primaryTickText,
       showgrid: !independentTicks,
       gridcolor: '#e2e8f0',
       zeroline: false,
@@ -116,12 +167,12 @@ function buildLayout(Jmin, Jmax, topUnit, independentTicks) {
     },
 
     xaxis2: {
-      title: { text: axisTitleForUnit(topUnit), standoff: 6 },
+      title: { text: axisTitleForUnit(topUnit, topPrefix), standoff: 6 },
       overlaying: 'x',
       // Draw the axis at the top edge but place ticks/labels below the axis line
       side: 'bottom',
-      type: 'log',
-      range: [Math.log10(Jmin), Math.log10(Jmax)],
+      type: isLog ? 'log' : 'linear',
+      range: isLog ? [Math.log10(Jmin), Math.log10(Jmax)] : [Jmin, Jmax],
       tickmode: 'array',
       tickvals: topTickValsJ,
       ticktext: topTickText,
@@ -181,9 +232,7 @@ function buildData(Jmin, Jmax) {
 function renderPlot(appState) {
   const Jmin = appState?.Jmin ?? 1e-25;
   const Jmax = appState?.Jmax ?? 1e-15;
-  const topUnit = appState?.topUnit ?? 'eV';
-  const independentTicks = !!appState?.independentTicks;
-  const layout = buildLayout(Jmin, Jmax, topUnit, independentTicks);
+  const layout = buildLayout(Jmin, Jmax, appState ?? {});
   const data = buildData(Jmin, Jmax);
   const config = { displayModeBar: false, responsive: true };
   Plotly.newPlot('plot', data, layout, config);

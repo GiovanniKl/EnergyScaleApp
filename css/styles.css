@@ -29,8 +29,9 @@ main {
 .control-panel {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 24px;
   padding: 8px 0 12px 0;
+  flex-wrap: wrap;
 }
 
 .control {
@@ -42,4 +43,26 @@ main {
 
 .control.checkbox span {
   margin-left: 6px;
+}
+
+.group {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.group strong {
+  font-size: 12px;
+  color: #334155;
+}
+
+.group .range-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.group input[type="number"] {
+  width: 110px;
 }
