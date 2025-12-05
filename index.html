@@ -10,10 +10,24 @@
   <body>
     <header>
       <h1>Energy Scale Demo (Phase 1: Static Prototype)</h1>
-      <p>Fixed Joule (bottom) and eV (top) axes with a hardcoded range.</p>
+      <p>Joule (bottom) and selectable unit (top). Toggle independent ticks.</p>
     </header>
 
     <main>
+      <section class="control-panel" aria-label="Controls">
+        <label class="control">
+          <span>Top axis unit</span>
+          <select id="unit-select">
+            <option value="eV" selected>eV</option>
+            <option value="Hz">Hz</option>
+            <option value="K">K</option>
+          </select>
+        </label>
+        <label class="control checkbox">
+          <input type="checkbox" id="independent-ticks" />
+          <span>Independent ticks</span>
+        </label>
+      </section>
       <div id="plot" aria-label="Energy scale plot"></div>
     </main>
 

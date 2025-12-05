@@ -3,8 +3,10 @@ function log10(x) { return Math.log(x) / Math.LN10; }
 function decadeFloor(x) { return Math.floor(log10(x)); }
 function decadeCeil(x) { return Math.ceil(log10(x)); }
 
-// Generate one tick per decade between Jmin and Jmax (inclusive)
-function generateJTicks(Jmin, Jmax) {
+// Generate one tick per decade between min and max (inclusive)
+function generateDecadeTicks(minVal, maxVal) {
+  const Jmin = Math.min(minVal, maxVal);
+  const Jmax = Math.max(minVal, maxVal);
   const start = decadeFloor(Jmin);
   const end = decadeCeil(Jmax);
   const ticks = [];
@@ -20,6 +22,10 @@ function generateJTicks(Jmin, Jmax) {
   return ticks;
 }
 
+function generateJTicks(Jmin, Jmax) {
+  return generateDecadeTicks(Jmin, Jmax);
+}
+
 function formatJ(J) {
   // Show compact sci-notation with unit
   if (J === 0) return "0 J";
@@ -33,18 +39,57 @@ function formatJ(J) {
 
 function formatEV(eV) {
   if (!isFinite(eV) || eV === 0) return `${eV}`;
-  const abs = Math.abs(eV);
-  if (abs >= 1e3 || abs < 1e-3) return `${eV.toExponential(0)} eV`;
-  if (abs < 1) return `${eV.toPrecision(2)} eV`;
-  return `${eV.toLocaleString(undefined, { maximumFractionDigits: 2 })} eV`;
+  // Pure scientific notation for consistency
+  return `${Number(eV).toExponential(2)} eV`;
 }
 
-function buildLayout(Jmin, Jmax) {
+function formatHz(Hz) {
+  if (!isFinite(Hz) || Hz === 0) return `${Hz}`;
+  if (!isFinite(Hz) || Hz === 0) return `${Hz}`;
+  return `${Number(Hz).toExponential(2)} Hz`;
+}
+
+function formatK(K) {
+  if (!isFinite(K) || K === 0) return `${K}`;
+  if (!isFinite(K) || K === 0) return `${K}`;
+  return `${Number(K).toExponential(2)} K`;
+}
+
+function formatUnitValue(unit, value) {
+  switch (unit) {
+    case 'eV': return formatEV(value);
+    case 'Hz': return formatHz(value);
+    case 'K': return formatK(value);
+    case 'J': default: return formatJ(value);
+  }
+}
+
+function axisTitleForUnit(unit) {
+  if (UNIT_MAP[unit] && UNIT_MAP[unit].label) return UNIT_MAP[unit].label;
+  return 'Energy';
+}
+
+function buildLayout(Jmin, Jmax, topUnit, independentTicks) {
   const jTicks = generateJTicks(Jmin, Jmax);
-  const evTicks = jTicks.map(J_to_eV);
+  let topTickValsJ;
+  let topTickText;
+
+  if (independentTicks) {
+    // Generate ticks in unit space, then map to J positions for tickvals
+    const uMin = UNIT_MAP[topUnit].fromJ(Jmin);
+    const uMax = UNIT_MAP[topUnit].fromJ(Jmax);
+    let unitTicks = generateDecadeTicks(uMin, uMax);
+    // Remove edge ticks to reduce clutter
+    unitTicks = unitTicks.filter(v => v > uMin * 1.0000001 && v < uMax / 1.0000001);
+    topTickValsJ = unitTicks.map(v => UNIT_MAP[topUnit].toJ(v));
+    topTickText = unitTicks.map(v => formatUnitValue(topUnit, v));
+  } else {
+    topTickValsJ = jTicks;
+    topTickText = jTicks.map(J => formatUnitValue(topUnit, UNIT_MAP[topUnit].fromJ(J)));
+  }
 
   return {
-    margin: { l: 40, r: 20, t: 100, b: 40 },
+    margin: { l: 40, r: 40, t: 100, b: 50 },
     showlegend: false,
     hovermode: false,
     paper_bgcolor: '#ffffff',
@@ -57,7 +102,7 @@ function buildLayout(Jmin, Jmax) {
       tickmode: 'array',
       tickvals: jTicks,
       ticktext: jTicks.map(formatJ),
-      showgrid: true,
+      showgrid: !independentTicks,
       gridcolor: '#e2e8f0',
       zeroline: false,
       linecolor: '#334155',
@@ -65,17 +110,21 @@ function buildLayout(Jmin, Jmax) {
       ticks: 'outside',
       ticklen: 6,
       tickcolor: '#334155',
+      automargin: true,
+      ticklabeloverflow: 'allow',
+      ticklabelposition: 'outside bottom',
     },
 
     xaxis2: {
-      title: { text: 'Energy (eV)', standoff: 6 },
+      title: { text: axisTitleForUnit(topUnit), standoff: 6 },
       overlaying: 'x',
-      side: 'top',
+      // Draw the axis at the top edge but place ticks/labels below the axis line
+      side: 'bottom',
       type: 'log',
       range: [Math.log10(Jmin), Math.log10(Jmax)],
       tickmode: 'array',
-      tickvals: jTicks,
-      ticktext: evTicks.map(formatEV),
+      tickvals: topTickValsJ,
+      ticktext: topTickText,
       showgrid: false,
       showline: true,
       showticklabels: true,
@@ -91,7 +140,8 @@ function buildLayout(Jmin, Jmax) {
       anchor: 'free',
       position: 1,
       layer: 'above traces',
-      ticklabelposition: 'outside top',
+      ticklabeloverflow: 'allow',
+      ticklabelposition: 'outside bottom',
     },
 
     yaxis: {
@@ -128,10 +178,12 @@ function buildData(Jmin, Jmax) {
   return [baseTrace, topTrace];
 }
 
-function renderPlot() {
-  const Jmin = 1e-25;
-  const Jmax = 1e-15;
-  const layout = buildLayout(Jmin, Jmax);
+function renderPlot(appState) {
+  const Jmin = appState?.Jmin ?? 1e-25;
+  const Jmax = appState?.Jmax ?? 1e-15;
+  const topUnit = appState?.topUnit ?? 'eV';
+  const independentTicks = !!appState?.independentTicks;
+  const layout = buildLayout(Jmin, Jmax, topUnit, independentTicks);
   const data = buildData(Jmin, Jmax);
   const config = { displayModeBar: false, responsive: true };
   Plotly.newPlot('plot', data, layout, config);

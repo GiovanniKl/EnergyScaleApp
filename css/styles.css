@@ -25,3 +25,21 @@ main {
   height: 440px;
   min-height: 320px;
 }
+
+.control-panel {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 8px 0 12px 0;
+}
+
+.control {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+}
+
+.control.checkbox span {
+  margin-left: 6px;
+}
