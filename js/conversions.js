@@ -89,6 +89,18 @@ const UNIT_MAP = {
     fromJ: (J) => J / 4.184,
     label: 'Energy (cal)'
   },
+  // BTU (International): 1 BTU ≈ 1055.06 J
+  BTU: {
+    toJ: (btu) => btu * 1055.06,
+    fromJ: (J) => J / 1055.06,
+    label: 'Energy (BTU)'
+  },
+  // foe (astrophysical unit): 1 foe = 1e44 J
+  foe: {
+    toJ: (f) => f * 1e44,
+    fromJ: (J) => J / 1e44,
+    label: 'Energy (foe)'
+  },
   // TNT tonnes: 1 tonne TNT ≈ 4.184e9 J
   tTNT: {
     toJ: (t) => t * 4.184e9,

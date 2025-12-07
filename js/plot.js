@@ -107,6 +107,8 @@ function formatUnitValue(unit, value, prefix = '', decimals = 2) {
     case 'Wh': return `${Number(scaled).toExponential(decimals)} ${prefix}Wh`;
     case 'Ws': return `${Number(scaled).toExponential(decimals)} ${prefix}Ws`;
     case 'cal': return `${Number(scaled).toExponential(decimals)} ${prefix}cal`;
+    case 'BTU': return `${Number(scaled).toExponential(decimals)} ${prefix}BTU`;
+    case 'foe': return `${Number(scaled).toExponential(decimals)} ${prefix}foe`;
     case 'tTNT': return `${Number(scaled).toExponential(decimals)} ${prefix}t TNT`;
     default: return `${Number(scaled).toExponential(decimals)} ${prefix}${unit}`;
   }
@@ -133,6 +135,8 @@ function axisTitleForUnit(unit, prefix = '') {
     case 'Wh': return `Energy (${prefix}Wh)`;
     case 'Ws': return `Energy (${prefix}Ws)`;
     case 'cal': return `Energy (${prefix}cal)`;
+    case 'BTU': return `Energy (${prefix}BTU)`;
+    case 'foe': return `Energy (${prefix}foe)`;
     case 'tTNT': return `Energy (${prefix}t TNT)`;
     default: return `${unit} (${prefix}${unit})`;
   }

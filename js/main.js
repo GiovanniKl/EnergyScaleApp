@@ -193,6 +193,8 @@ function bindControls() {
         ['Wh','Wh (watt-hour)'],
         ['Ws','Ws (watt-second)'],
         ['cal','cal (calorie)'],
+        ['BTU','BTU (British thermal unit)'],
+        ['foe','foe (10^51 erg)'],
         ['tTNT','t TNT (tonne TNT)'],
       ];
       unitOptions.forEach(([value, text]) => {
