@@ -7,7 +7,7 @@ body {
   background: #ffffff;
 }
 header {
-  padding: 16px 20px 0 20px;
+  padding: 16px 20px 16px 20px;
 }
 header h1 {
   margin: 0 0 6px 0;
@@ -20,9 +20,9 @@ header p {
 /* App shell layout */
 .app-shell {
   display: grid;
-  grid-template-columns: 460px 1fr;
+  grid-template-columns: 480px 1fr;
   gap: 0;
-  height: calc(100vh - 64px);
+  height: calc(100vh - 128px);
 }
 
 .sidebar {
@@ -82,13 +82,15 @@ header p {
   font-size: 12px;
   color: #334155;
   text-transform: uppercase;
-  letter-spacing: 0.03em;
+  letter-spacing: 0.04em;
+  display: block;
+  width: 100%;
 }
 
 .group .range-row {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
 }
 
 .group input[type="number"] {
@@ -115,6 +117,16 @@ input:hover, select:hover, button:hover {
   background: #f0f6f7;
   border-radius: 2px;
   border-style: solid;
+}
+/* Keep the width range input from shifting on hover/focus */
+input[type="range"] {
+  border: 1px solid transparent;
+}
+input[type="range"]:hover,
+input[type="range"]:focus {
+  background: inherit;
+  box-shadow: none;
+  border-color: transparent;
 }
 button:hover, button:focus {
   border-radius: 6px; /* to keep it same as for button below */
