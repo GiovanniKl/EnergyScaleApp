@@ -20,7 +20,7 @@ header p {
 /* App shell layout */
 .app-shell {
   display: grid;
-  grid-template-columns: 440px 1fr;
+  grid-template-columns: 460px 1fr;
   gap: 0;
   height: calc(100vh - 64px);
 }
@@ -48,7 +48,7 @@ header p {
 
 .control-panel {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 24px;
   padding: 8px 0 12px 0;
   flex-wrap: wrap;
@@ -57,12 +57,16 @@ header p {
 .control {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: 12px;
   font-size: 14px;
 }
 
+.control span {
+  color: #1f2937;
+}
+
 .control.checkbox span {
-  margin-left: 6px;
+  margin-left: 0px;
 }
 
 .group {
@@ -70,11 +74,15 @@ header p {
   align-items: center;
   gap: 10px;
   flex-wrap: wrap;
+  padding: 8px 0 12px 0;
+  border-bottom: 2px solid #e5e7eb;
 }
 
 .group strong {
   font-size: 12px;
   color: #334155;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
 }
 
 .group .range-row {
@@ -85,6 +93,40 @@ header p {
 
 .group input[type="number"] {
   width: 110px;
+}
+
+/* Compact small numeric inputs */
+.group #format-decimals,
+.group #export-dpi {
+  width: 64px;
+}
+
+/* Focus states */
+input, select, button {
+  outline: none;
+}
+input:focus, select:focus, button:focus {
+  box-shadow: 0 0 0 1px rgba(3,131,135,0.3);
+  border-color: #038287;
+  border-radius: 2px;
+  border-style: solid;
+}
+input:hover, select:hover, button:hover { 
+  background: #f0f6f7;
+  border-radius: 2px;
+  border-style: solid;
+}
+button:hover, button:focus {
+  border-radius: 6px; /* to keep it same as for button below */
+}
+
+/* Buttons */
+button {
+  padding: 6px 10px;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  background: #ffffff;
+  color: #0f172a;
 }
 
 .axes-list {
@@ -102,4 +144,9 @@ header p {
 
 .axis-row .remove-btn {
   margin-left: auto;
+}
+
+/* Plot axis text sizing */
+.main-panel #plot {
+  width: var(--plot-width, 100%);
 }

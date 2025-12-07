@@ -3,13 +3,14 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Energy Scale Demo — Phase 1</title>
+    <title>Energy Scale Comparison</title>
     <link rel="stylesheet" href="css/styles.css" />
     <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
   </head>
   <body>
     <header>
-      <h1>Energy Scale Demo</h1>
+      <h1>Energy Scale Comparison</h1>
+      Some text for stuff
     </header>
 
     <div class="app-shell">
@@ -93,13 +94,13 @@
 
           <div class="group">
             <strong>Ticking</strong>
-            <label class="control checkbox">
+            <label class="control checkbox" title="(log10 scale only) Toggles decade ticks for secondary axes.">
               <input type="checkbox" id="independent-ticks" />
-              <span>Independent ticks</span>
+              <span>Independent log ticks</span>
             </label>
-            <label class="control" title="Only applies in linear scale; ignored in log10">
-              <span title="Only applies in linear scale; ignored in log10">Independent tick count</span>
-              <input type="number" id="independent-tick-count" min="0" step="1" value="0" title="Only applies in linear scale; ignored in log10" />
+            <label class="control" title="(linear scale only; 0, 1 = auto) Sets number of ticks over all axes.">
+              <span>Linear tick count</span>
+              <input type="number" id="independent-tick-count" min="0" step="1" value="0" />
             </label>
           </div>
 
@@ -128,27 +129,27 @@
                 <option value="Times New Roman">Times New Roman</option>
               </select>
             </label>
-            <label class="control" title="Download exported figure">
+            <label class="control" title="Exported figure format.">
               <span>Export</span>
               <select id="export-format">
                 <option value="png" selected>PNG</option>
                 <option value="svg">SVG</option>
               </select>
             </label>
-            <label class="control">
+            <label class="control" title="DPI resolution for PNG export.">
               <span>DPI</span>
-              <input type="number" id="export-dpi" min="72" max="600" step="1" value="150" title="DPI resolution for PNG export" />
+              <input type="number" id="export-dpi" min="72" max="600" step="1" value="150" />
             </label>
             <button id="export-figure" type="button">Export</button>
-            <label class="control" title="Show/hide axis title labels like 'Energy (J)'">
+            <label class="control" title="Toggles axis title labels like 'Energy (J)'.">
               <input type="checkbox" id="show-axis-labels" checked />
               <span>Show axis labels</span>
             </label>
-            <label class="control" title="Include unit symbols in tick labels">
+            <label class="control" title="Toggles unit symbols in tick labels.">
               <input type="checkbox" id="tick-labels-include-units" checked />
               <span>Include units in tick labels</span>
             </label>
-            <label class="control" title="Number of decimal places in scientific notation">
+            <label class="control" title="Number of decimal places in scientific notation.">
               <span>Decimals</span>
               <input type="number" id="format-decimals" min="0" max="6" step="1" value="2" />
             </label>

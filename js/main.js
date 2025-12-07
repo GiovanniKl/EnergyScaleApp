@@ -62,7 +62,8 @@ function bindControls() {
     const onScaleChange = () => {
       appState.scale = scaleLog.checked ? 'log10' : 'linear';
       // Auto-disable independent tick count on log scale
-      if (indepTickCountInput) indepTickCountInput.disabled = appState.scale === 'log10';
+      indepTickCountInput.disabled = appState.scale === 'log10';
+      if (independent) independent.disabled = appState.scale === 'linear';
       syncRangeInputs();
       renderPlot(appState);
     };
@@ -179,10 +180,10 @@ function bindControls() {
       unitLabel.innerHTML = '<span>Unit</span>';
       const unitSel = document.createElement('select');
       const unitOptions = [
+        ['J','J (joule)'],
         ['eV','eV (electronvolt)'],
         ['Hz','Hz (hertz)'],
         ['K','K (kelvin)'],
-        ['J','J (joule)'],
         ['m','m (wavelength)'],
         ['m^-1','m⁻¹ (wavenumber)'],
         ['rad/m','rad/m (ang. wavenumber)'],
