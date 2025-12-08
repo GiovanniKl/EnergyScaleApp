@@ -18,7 +18,7 @@ EnergyScaleApp is a client-side, interactive tool to compare and visualize energ
 ## Supported Units
 Energy and related conversions across:
 - J (joule), eV (electronvolt), Hz (hertz), K (kelvin)
-- Wavelength `m`, wavenumber `m⁻¹`, angular wavenumber `rad/m`
+- Wavelength (m), wavenumber (m⁻¹), angular wavenumber (rad/m) by free-space dispersion relation of light.
 - erg (cgs), kg (mass via E=mc^2), s (time via E=h/t)
 - Wh, Ws, cal, t TNT (tonne TNT), BTU, foe (10^51 erg)
 
@@ -31,7 +31,7 @@ Metric prefixes include: Z, E, P, T, G, M, k, c, m, µ, n, p, f.
 - Research communication: export clean figures for papers or presentations.
 
 ## How to use it
-Visit [https://giovannikl.github.io/EnergyScaleApp/] and try it yourself in your browser!
+Visit [https://giovannikl.github.io/EnergyScaleApp/](https://giovannikl.github.io/EnergyScaleApp/) and try it yourself in your browser!
 
 If you want to try it locally on your machine, download the contents of this repository and open the `index.html` file in a browser.
 
