@@ -17,6 +17,28 @@ header p {
   margin: 0 0 10px 0;
   color: #475569;
 }
+/* GitHub repo link in header */
+/* Reusable repo link button style */
+.repo-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 10px;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  color: #0f172a;
+  text-decoration: none;
+}
+.repo-link:hover, .repo-link:focus {
+  background: #f0f6f7;
+  box-shadow: 0 0 0 1px rgba(3,131,135,0.15);
+}
+.repo-link__icon {
+  display: inline-block;
+}
+.repo-link__text {
+  font-size: 13px;
+}
 /* App shell layout */
 .app-shell {
   display: grid;
@@ -30,6 +52,8 @@ header p {
   border-right: 1px solid #e2e8f0;
   overflow-y: auto;
   overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
 }
 
 .main-panel {
@@ -161,4 +185,14 @@ button {
 /* Plot axis text sizing */
 .main-panel #plot {
   width: var(--plot-width, 100%);
+}
+
+/* Sidebar footer repo link */
+.sidebar-footer {
+  margin-top: auto;
+  padding-top: 12px;
+  text-align: center;
+}
+.sidebar-footer .repo-link {
+  justify-content: center;
 }
