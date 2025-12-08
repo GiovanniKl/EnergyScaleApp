@@ -61,34 +61,6 @@ function generateIndependentUnitTicks(uMin, uMax, isLog, linearCount) {
   return interior;
 }
 
-function formatJ(J) {
-  // Show compact sci-notation with unit
-  if (J === 0) return "0 J";
-  const exp = Math.floor(log10(Math.abs(J)));
-  const mant = J / Math.pow(10, exp);
-  if (!isFinite(exp)) return `${J} J`;
-  // Prefer concise: 1e-20 J
-  if (Math.abs(mant - 1) < 1e-12) return `1e${exp} J`;
-  return `${mant.toFixed(1)}e${exp} J`;
-}
-
-function formatEV(eV) {
-  if (!isFinite(eV) || eV === 0) return `${eV}`;
-  // Pure scientific notation for consistency
-  return `${Number(eV).toExponential(2)} eV`;
-}
-
-function formatHz(Hz) {
-  if (!isFinite(Hz) || Hz === 0) return `${Hz}`;
-  if (!isFinite(Hz) || Hz === 0) return `${Hz}`;
-  return `${Number(Hz).toExponential(2)} Hz`;
-}
-
-function formatK(K) {
-  if (!isFinite(K) || K === 0) return `${K}`;
-  if (!isFinite(K) || K === 0) return `${K}`;
-  return `${Number(K).toExponential(2)} K`;
-}
 
 function formatUnitValue(unit, value, prefix = '', decimals = 2) {
   const f = typeof prefixFactor === 'function' ? prefixFactor(prefix) : 1;
@@ -147,7 +119,6 @@ function axisTitleForUnit(unit, prefix = '') {
 }
 
 function buildLayout(Jmin, Jmax, appState) {
-  const topUnit = appState?.topUnit ?? 'eV';
   const axes = Array.isArray(appState?.axes) ? appState.axes : [];
   const independentTicks = !!appState?.independentTicks;
   const primaryUnit = appState?.primaryUnit ?? 'J';
@@ -291,7 +262,7 @@ function buildLayout(Jmin, Jmax, appState) {
       ticks: 'outside',
       ticklen: 6,
       tickcolor: '#334155',
-      tickfont: { color: '#0f172a', size: 11 },
+      tickfont: { color: '#0f172a', size: 12 },
       automargin: true,
       zeroline: false,
       linecolor: '#334155',

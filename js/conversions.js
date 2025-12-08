@@ -119,11 +119,6 @@ const UNIT_MAP = {
     },
 };
 
-function convert(value, fromUnit, toUnit) {
-  const J = UNIT_MAP[fromUnit].toJ(value);
-  return UNIT_MAP[toUnit].fromJ(J);
-}
-
 // SI-like prefix factors
 const PREFIX_FACTOR = {
   '': 1,

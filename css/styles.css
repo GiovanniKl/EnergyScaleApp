@@ -182,11 +182,6 @@ button {
   margin-left: auto;
 }
 
-/* Plot axis text sizing */
-.main-panel #plot {
-  width: var(--plot-width, 100%);
-}
-
 /* Sidebar footer repo link */
 .sidebar-footer {
   margin-top: auto;
