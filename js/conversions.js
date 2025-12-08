@@ -107,6 +107,16 @@ const UNIT_MAP = {
     fromJ: (J) => J / 4.184e9,
     label: 'Energy (t TNT)'
   },
+    "Ah@5V": {
+      label: "Ah@5V",
+      toJ: (val) => val * 5 * 3600,
+      fromJ: (j) => j / (5 * 3600),
+    },
+    "Ah@12V": {
+      label: "Ah@12V",
+      toJ: (val) => val * 12 * 3600,
+      fromJ: (j) => j / (12 * 3600),
+    },
 };
 
 function convert(value, fromUnit, toUnit) {

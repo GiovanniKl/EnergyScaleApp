@@ -18,16 +18,16 @@ EnergyScaleApp is a client-side, interactive tool to compare and visualize energ
 ## Supported Units
 Energy and related conversions across:
 - J (joule), eV (electronvolt), Hz (hertz), K (kelvin)
-- Wavelength (m), wavenumber (m⁻¹), angular wavenumber (rad/m) by free-space dispersion relation of light.
+- wavelength (m), wavenumber (m⁻¹), angular wavenumber (rad/m) by free-space dispersion relation of light
 - erg (cgs), kg (mass via E=mc^2), s (time via E=h/t)
-- Wh, Ws, cal, t TNT (tonne TNT), BTU, foe (10^51 erg)
+- Wh, Ws, Ah (at 5 or 12 V), cal, t TNT (tonne TNT), BTU, foe (10^51 erg)
 
 Metric prefixes include: Z, E, P, T, G, M, k, c, m, µ, n, p, f.
 
 ## Use Cases
 - Cross-domain comparison: relate photon energies (eV) to wavelengths (m) and frequencies (Hz).
 - Educational visualization: show how temperature (K) maps to energy via Boltzmann constant.
-- Engineering context: compare stored energy (Wh, Ws, BTU) on one scale.
+- Engineering context: compare stored energy (Wh, Ws, Ah, BTU) on one scale.
 - Research communication: export clean figures for papers or presentations.
 
 ## How to use it

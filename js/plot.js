@@ -110,6 +110,8 @@ function formatUnitValue(unit, value, prefix = '', decimals = 2) {
     case 'BTU': return `${Number(scaled).toExponential(decimals)} ${prefix}BTU`;
     case 'foe': return `${Number(scaled).toExponential(decimals)} ${prefix}foe`;
     case 'tTNT': return `${Number(scaled).toExponential(decimals)} ${prefix}t TNT`;
+    case 'Ah@5V': return `${Number(scaled).toExponential(decimals)} ${prefix}Ah`;
+    case 'Ah@12V': return `${Number(scaled).toExponential(decimals)} ${prefix}Ah`;
     default: return `${Number(scaled).toExponential(decimals)} ${prefix}${unit}`;
   }
 }
@@ -138,6 +140,8 @@ function axisTitleForUnit(unit, prefix = '') {
     case 'BTU': return `Energy (${prefix}BTU)`;
     case 'foe': return `Energy (${prefix}foe)`;
     case 'tTNT': return `Energy (${prefix}t TNT)`;
+    case 'Ah@5V': return `Energy (${prefix}Ah @ 5 V)`;
+    case 'Ah@12V': return `Energy (${prefix}Ah @ 12 V)`;
     default: return `${unit} (${prefix}${unit})`;
   }
 }

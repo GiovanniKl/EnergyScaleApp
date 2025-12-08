@@ -196,6 +196,8 @@ function bindControls() {
         ['BTU','BTU (British thermal unit)'],
         ['foe','foe (10^51 erg)'],
         ['tTNT','t TNT (tonne TNT)'],
+        ['Ah@5V','Ah (ampere-hour at 5 V)'],
+        ['Ah@12V','Ah (ampere-hour at 12 V)'],
       ];
       unitOptions.forEach(([value, text]) => {
         const opt = document.createElement('option');
