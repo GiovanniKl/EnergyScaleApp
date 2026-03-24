@@ -74,7 +74,7 @@ function formatUnitValue(unit, value, prefix = '', decimals = 2) {
     case 'J': return `${Number(scaled).toExponential(decimals)} ${prefix}J`;
     case 'm': return `${Number(scaled).toExponential(decimals)} ${prefix}m`;
     case 'm^-1': return `${Number(scaled).toExponential(decimals)} ${prefix}m⁻¹`;
-    case 'rad/m': return `${Number(scaled).toExponential(decimals)} ${prefix}rad/m`;
+    case 'rad/m': return `${Number(scaled).toExponential(decimals)} rad/${prefix}m`;
     case 'erg': return `${Number(scaled).toExponential(decimals)} ${prefix}erg`;
     case 'kg': return `${Number(scaled).toExponential(decimals)} ${prefix}kg`;
     case 's': return `${Number(scaled).toExponential(decimals)} ${prefix}s`;
@@ -106,7 +106,7 @@ function axisTitleForUnit(unit, prefix = '') {
     case 'J': return `Energy (${prefix}J)`;
     case 'm': return `Wavelength (${prefix}m)`;
     case 'm^-1': return `Wavenumber (${prefix}m⁻¹)`;
-    case 'rad/m': return `Wavenumber (${prefix}rad/m)`;
+    case 'rad/m': return `Wavenumber (rad/${prefix}m)`;
     case 'erg': return `Energy (${prefix}erg)`;
     case 'kg': return `Mass (${prefix}kg)`;
     case 's': return `Time (${prefix}s)`;
