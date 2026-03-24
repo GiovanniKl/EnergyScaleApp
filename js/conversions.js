@@ -140,3 +140,12 @@ const PREFIX_FACTOR = {
 function prefixFactor(prefix) {
   return PREFIX_FACTOR[prefix] ?? 1;
 }
+
+// For reciprocal length units, prefixes scale inversely.
+// Example: 1 mm^-1 = 1000 m^-1, so factor is 1 / milli.
+const RECIPROCAL_PREFIX_UNITS = new Set(['m^-1', 'rad/m']);
+
+function unitPrefixFactor(unit, prefix) {
+  const f = prefixFactor(prefix);
+  return RECIPROCAL_PREFIX_UNITS.has(unit) ? 1 / f : f;
+}

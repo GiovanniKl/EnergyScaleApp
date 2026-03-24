@@ -88,8 +88,10 @@ function bindControls() {
   }
 
   function applyRangeFromMinMax() {
-    const pfx = typeof prefixFactor === 'function' ? prefixFactor(appState.primaryPrefix) : 1;
     const unit = appState.primaryUnit;
+    const pfx = typeof unitPrefixFactor === 'function'
+      ? unitPrefixFactor(unit, appState.primaryPrefix)
+      : (typeof prefixFactor === 'function' ? prefixFactor(appState.primaryPrefix) : 1);
     if (appState.scale === 'log10') {
       const minExp = Number(minInput.value);
       const maxExp = Number(maxInput.value);
@@ -111,8 +113,10 @@ function bindControls() {
   }
 
   function applyRangeFromCenterSpan() {
-    const pfx = typeof prefixFactor === 'function' ? prefixFactor(appState.primaryPrefix) : 1;
     const unit = appState.primaryUnit;
+    const pfx = typeof unitPrefixFactor === 'function'
+      ? unitPrefixFactor(unit, appState.primaryPrefix)
+      : (typeof prefixFactor === 'function' ? prefixFactor(appState.primaryPrefix) : 1);
     if (appState.scale === 'log10') {
       const cExp = Number(centerInput.value);
       const spanExp = Number(spanInput.value);
@@ -138,8 +142,10 @@ function bindControls() {
   }
 
   function syncRangeInputs() {
-    const pfx = typeof prefixFactor === 'function' ? prefixFactor(appState.primaryPrefix) : 1;
     const unit = appState.primaryUnit;
+    const pfx = typeof unitPrefixFactor === 'function'
+      ? unitPrefixFactor(unit, appState.primaryPrefix)
+      : (typeof prefixFactor === 'function' ? prefixFactor(appState.primaryPrefix) : 1);
     const minScaled = UNIT_MAP[unit].fromJ(appState.Jmin) / pfx;
     const maxScaled = UNIT_MAP[unit].fromJ(appState.Jmax) / pfx;
     if (appState.scale === 'log10') {

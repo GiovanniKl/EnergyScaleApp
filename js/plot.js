@@ -63,7 +63,9 @@ function generateIndependentUnitTicks(uMin, uMax, isLog, linearCount) {
 
 
 function formatUnitValue(unit, value, prefix = '', decimals = 2) {
-  const f = typeof prefixFactor === 'function' ? prefixFactor(prefix) : 1;
+  const f = typeof unitPrefixFactor === 'function'
+    ? unitPrefixFactor(unit, prefix)
+    : (typeof prefixFactor === 'function' ? prefixFactor(prefix) : 1);
   const scaled = value / f;
   switch (unit) {
     case 'eV': return `${Number(scaled).toExponential(decimals)} ${prefix}eV`;
@@ -89,7 +91,9 @@ function formatUnitValue(unit, value, prefix = '', decimals = 2) {
 }
 
 function formatValueNoUnit(unit, value, prefix = '', decimals = 2) {
-  const f = typeof prefixFactor === 'function' ? prefixFactor(prefix) : 1;
+  const f = typeof unitPrefixFactor === 'function'
+    ? unitPrefixFactor(unit, prefix)
+    : (typeof prefixFactor === 'function' ? prefixFactor(prefix) : 1);
   const scaled = value / f;
   return `${Number(scaled).toExponential(decimals)}`;
 }
@@ -136,7 +140,9 @@ function buildLayout(Jmin, Jmax, appState) {
   let primaryTickText; // labels formatted in primary unit space
 
   // Derive primary unit-space range (scaled by prefix for display)
-  const pf = typeof prefixFactor === 'function' ? prefixFactor(primaryPrefix) : 1;
+  const pf = typeof unitPrefixFactor === 'function'
+    ? unitPrefixFactor(primaryUnit, primaryPrefix)
+    : (typeof prefixFactor === 'function' ? prefixFactor(primaryPrefix) : 1);
   const pMin = UNIT_MAP[primaryUnit].fromJ(Jmin);
   const pMax = UNIT_MAP[primaryUnit].fromJ(Jmax);
   let uLo = Math.min(pMin / pf, pMax / pf);
@@ -232,7 +238,9 @@ function buildLayout(Jmin, Jmax, appState) {
     if (independentTicks) {
       const uMin = UNIT_MAP[ax.unit].fromJ(Jmin);
       const uMax = UNIT_MAP[ax.unit].fromJ(Jmax);
-      const pfa = typeof prefixFactor === 'function' ? prefixFactor(ax.prefix) : 1;
+      const pfa = typeof unitPrefixFactor === 'function'
+        ? unitPrefixFactor(ax.unit, ax.prefix)
+        : (typeof prefixFactor === 'function' ? prefixFactor(ax.prefix) : 1);
       const unitTicks = generateIndependentUnitTicks(uMin / pfa, uMax / pfa, isLog, linearCount);
       tickvalsJ = unitTicks.map(v => UNIT_MAP[ax.unit].toJ(v * pfa));
       ticktext = unitTicks.map(v => includeUnits ? formatUnitValue(ax.unit, v * pfa, ax.prefix, decimals)
