@@ -70,6 +70,7 @@ function formatUnitValue(unit, value, prefix = '', decimals = 2) {
   switch (unit) {
     case 'eV': return `${Number(scaled).toExponential(decimals)} ${prefix}eV`;
     case 'Hz': return `${Number(scaled).toExponential(decimals)} ${prefix}Hz`;
+    case 'rad/s': return `${Number(scaled).toExponential(decimals)} rad/${prefix}s`;
     case 'K': return `${Number(scaled).toExponential(decimals)} ${prefix}K`;
     case 'J': return `${Number(scaled).toExponential(decimals)} ${prefix}J`;
     case 'm': return `${Number(scaled).toExponential(decimals)} ${prefix}m`;
@@ -101,6 +102,7 @@ function formatValueNoUnit(unit, value, prefix = '', decimals = 2) {
 function axisTitleForUnit(unit, prefix = '') {
   switch (unit) {
     case 'Hz': return `Frequency (${prefix}Hz)`;
+    case 'rad/s': return `Angular frequency (rad/${prefix}s)`;
     case 'K': return `Temperature (${prefix}K)`;
     case 'eV': return `Energy (${prefix}eV)`;
     case 'J': return `Energy (${prefix}J)`;

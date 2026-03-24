@@ -188,7 +188,8 @@ function bindControls() {
       const unitOptions = [
         ['J','J (joule)'],
         ['eV','eV (electronvolt)'],
-        ['Hz','Hz (hertz)'],
+        ['Hz','Hz (frequency)'],
+        ['rad/s','rad/s (ang. frequency)'],
         ['K','K (kelvin)'],
         ['m','m (wavelength)'],
         ['m^-1','m⁻¹ (wavenumber)'],

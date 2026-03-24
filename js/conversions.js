@@ -53,6 +53,12 @@ const UNIT_MAP = {
     fromJ: (J) => (J * (2 * Math.PI)) / (CONSTANTS.h * CONSTANTS.c),
     label: 'Wavenumber (rad/m)'
   },
+  // Angular frequency ω [rad/s]: E = ħω = hω/(2π)
+  'rad/s': {
+    toJ: (rad_per_s) => (rad_per_s * CONSTANTS.h) / (2 * Math.PI),
+    fromJ: (J) => (J * (2 * Math.PI)) / CONSTANTS.h,
+    label: 'Angular frequency (rad/s)'
+  },
   // Erg: 1 erg = 1e-7 J
   erg: {
     toJ: (erg) => erg * 1e-7,
@@ -141,9 +147,9 @@ function prefixFactor(prefix) {
   return PREFIX_FACTOR[prefix] ?? 1;
 }
 
-// For reciprocal length units, prefixes scale inversely.
+// For reciprocal units, prefixes scale inversely.
 // Example: 1 mm^-1 = 1000 m^-1, so factor is 1 / milli.
-const RECIPROCAL_PREFIX_UNITS = new Set(['m^-1', 'rad/m']);
+const RECIPROCAL_PREFIX_UNITS = new Set(['m^-1', 'rad/m', 'rad/s']);
 
 function unitPrefixFactor(unit, prefix) {
   const f = prefixFactor(prefix);
